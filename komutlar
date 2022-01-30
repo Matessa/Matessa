@@ -1,0 +1,39 @@
+const Discord = require('discord.js');
+const db = require('quick.db')
+
+exports.run = (client, message, args) => {
+  
+  var bankanal = db.fetch(`banlog_${message.guild.id}`)
+  
+  let role = db.fetch(`banyetki_${message.guild.id}`)
+  if(!message.member.hasPermissions(role)) return message.reply("Bir üyeyi banlaman için ban yetkilisi olman gerekmektedir!");
+  if (!message.guild.roles.get(role)) return message.reply("Herhangi bir ban yetkili rolü ayarlanamış! Ayarlamak için ban sistemine göz atın: **a!ban-sistemi**")
+  if (!message.guild.channels.get(bankanal)) return message.reply("Herhangi bir log kanal ayarlanamış! Ayarlamak için ban sistemine göz atın: **a!ban-sistemi**")
+  
+  const mod = message.author;
+  client.unbanAuth = message.author;
+  let user = args[0]
+  if (!user) return message.reply('Banı kaldırılacak kişinin ID numarasını yazmalısın.')
+  message.guild.unban(user, 2);
+
+  const embed = new Discord.RichEmbed()
+    .setColor(0x00AE86)
+    .setTimestamp()
+    .setThumbnail(user.avataruRL)
+    .addField('Eylem:', '**Sunucudan Yasak Kaldıran**')
+    .addField('**Yasağı Kaldırılan Kullanıcı (idi):**', `(${user})`) 
+    .addField('**Yasağı Kaldıran Yetkili:**', `${message.author.username}#${message.author.discriminator}`)
+client.channels.get(bankanal).send(embed)
+
+  };
+
+exports.conf = {
+  enabled: true,
+  guildOnly: true,
+  aliases: [],
+  permLevel: 2
+};
+
+exports.help = {
+  name: 'unban'
+};
